@@ -1,9 +1,9 @@
-import { PauseCircle, PlayCircle, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/current-user";
-import { revalidatePath } from "next/cache";
 import HabitsClient from "./HabitsClient";
 import AddHabitButton from "./AddHabitButton";
+import ToggleHabitButton from "./ToggleHabitButton";
 
 export default async function HabitsPage() {
   const user = await getCurrentUser();
@@ -90,42 +90,8 @@ export default async function HabitsPage() {
                 </div>
               </div>
 
-              {/* Pause / Resume */}
-              <form
-                action={async () => {
-                  "use server";
-                  await prisma.habit.update({
-                    where: { id: habit.id },
-                    data: { isActive: !habit.isActive },
-                  });
-                  revalidatePath("/habits");
-                }}
-              >
-                <button
-                  type="submit"
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
-                    habit.isActive
-                      ? "bg-blue-50 text-blue-600 border-blue-100"
-                      : "bg-slate-100 text-slate-500 border-slate-200"
-                  }`}
-                >
-                  {habit.isActive ? (
-                    <>
-                      <PlayCircle className="w-4 h-4" />
-                      <span className="text-[10px] font-black uppercase">
-                        Active
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <PauseCircle className="w-4 h-4" />
-                      <span className="text-[10px] font-black uppercase">
-                        Paused
-                      </span>
-                    </>
-                  )}
-                </button>
-              </form>
+              {/* Pause / Resume (client) */}
+              <ToggleHabitButton habitId={habit.id} isActive={habit.isActive} />
             </div>
           ))}
         </div>

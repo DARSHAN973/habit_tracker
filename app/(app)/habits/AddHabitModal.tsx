@@ -1,32 +1,43 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AddHabitModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("HEALTH");
   const [type, setType] = useState("DAILY");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function submit() {
     if (!title.trim() || loading) return;
 
     setLoading(true);
 
-    await fetch("/api/habits/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        category,
-        type,
-      }),
-    });
+    try {
+      const res = await fetch("/api/habit/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          category,
+          type,
+        }),
+      });
 
-    onClose();
-    location.reload(); // acceptable for v1
+      if (!res.ok) throw new Error("Failed to create habit");
+
+      onClose();
+      // Refresh server components so the newly created habit appears in the list
+      router.refresh();
+    } catch (err) {
+      // You can replace this with a toast/notification
+      console.error("Create habit failed:", err);
+      setLoading(false);
+    }
   }
 
   return (
@@ -90,7 +101,7 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
-        <div className="flex gap-3 pt-2">
+  <div className="flex gap-3 pt-2">
           <button
             onClick={onClose}
             className="flex-1 rounded-xl border p-3"
@@ -108,6 +119,34 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
+      {/* Global loading overlay for the modal create action */}
+      {loading && (
+        <div className="absolute inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <svg
+              className="animate-spin h-10 w-10 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            <p className="text-white font-semibold">Saving habit...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
