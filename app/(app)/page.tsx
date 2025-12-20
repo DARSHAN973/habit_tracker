@@ -1,4 +1,5 @@
 import { TrendingUp, AlertCircle, Award } from "lucide-react";
+// import DateDisplay from "./components/DateDisplay";
 
 export default function DashboardPage() {
   return (
@@ -17,6 +18,9 @@ export default function DashboardPage() {
             <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
             Today counts.
           </p>
+          {/* <div className="absolute top-0 right-0">
+            <DateDisplay />
+          </div> */}
         </div>
       </div>
 

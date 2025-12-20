@@ -1,4 +1,5 @@
 import { Settings2 } from "lucide-react";
+import DateDisplay from "../components/DateDisplay";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/current-user";
 import HabitsClient from "./HabitsClient";
@@ -33,6 +34,9 @@ export default async function HabitsPage() {
               <span className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full" />
               Manage your daily rituals
             </p>
+            <div className="absolute top-0 right-0">
+              <DateDisplay />
+            </div>
           </div>
         </div>
 

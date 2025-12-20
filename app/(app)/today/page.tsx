@@ -1,4 +1,5 @@
 import { CheckCircle, Clock, Flame } from "lucide-react";
+import DateDisplay from "../components/DateDisplay";
 
 export default function TodayPage() {
   const habits = [
@@ -28,6 +29,9 @@ export default function TodayPage() {
             <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
             Focus on showing up
           </p>
+          <div className="absolute top-0 right-0">
+            <DateDisplay />
+          </div>
         </div>
       </div>
 

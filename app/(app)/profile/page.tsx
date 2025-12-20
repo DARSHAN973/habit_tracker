@@ -1,4 +1,5 @@
 import { LogOut, Shield, Info, User, ChevronRight } from "lucide-react";
+import DateDisplay from "../components/DateDisplay";
 
 export default function ProfilePage() {
   return (
@@ -15,6 +16,9 @@ export default function ProfilePage() {
             <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
             Manage your personal system
           </p>
+          <div className="absolute top-0 right-0">
+            <DateDisplay />
+          </div>
         </div>
       </div>
 
