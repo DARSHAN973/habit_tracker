@@ -24,11 +24,11 @@ export async function GET() {
   });
 
   return NextResponse.json(
-    habits.map(h => ({
+    habits.map((h) => ({
       id: h.id,
       title: h.title,
       category: h.category,
-      done: h.entries[0]?.status === "DONE",
+      done: h.entries.length > 0,
     }))
   );
 }

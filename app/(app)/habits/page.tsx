@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/app/lib/current-user";
 import HabitsClient from "./HabitsClient";
 import AddHabitButton from "./AddHabitButton";
 import ToggleHabitButton from "./ToggleHabitButton";
+import DeleteHabitButton from "./DeleteHabitButton";
 
 export default async function HabitsPage() {
   const user = await getCurrentUser();
@@ -24,14 +25,14 @@ export default async function HabitsPage() {
       <div className="space-y-6 relative min-h-screen pb-12">
         {/* Header */}
         <div className="relative mb-8">
-          <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20" />
+          <div className="absolute -inset-2 bg-linear-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20" />
 
           <div className="relative">
-            <p className="text-2xl font-black leading-tight mb-2 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+            <p className="text-2xl font-black leading-tight mb-2 bg-linear-to-br from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
               Your System
             </p>
             <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full" />
+              <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
               Manage your daily rituals
             </p>
             <div className="absolute top-0 right-0">
@@ -42,7 +43,7 @@ export default async function HabitsPage() {
 
         {/* Overview Card */}
         <div className="relative rounded-3xl bg-white shadow-md p-6 overflow-hidden mb-8 border border-slate-50">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 to-transparent" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
@@ -94,8 +95,11 @@ export default async function HabitsPage() {
                 </div>
               </div>
 
-              {/* Pause / Resume (client) */}
-              <ToggleHabitButton habitId={habit.id} isActive={habit.isActive} />
+              {/* Pause / Resume (client) + Delete */}
+              <div className="flex items-center gap-2">
+                <ToggleHabitButton habitId={habit.id} isActive={habit.isActive} />
+                <DeleteHabitButton habitId={habit.id} />
+              </div>
             </div>
           ))}
         </div>
