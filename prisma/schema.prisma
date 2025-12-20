@@ -25,7 +25,7 @@ model Habit {
   type      HabitType
   category  HabitCategory
   startDate DateTime
-  isActive  Boolean      @default(true)
+  active  Boolean      @default(true)
   user      User         @relation(fields: [userId], references: [id])
   entries   HabitEntry[]
   createdAt DateTime     @default(now())

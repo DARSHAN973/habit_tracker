@@ -11,7 +11,7 @@ export default function TodayPage() {
 
   const completedCount = habits.filter(h => h.completed).length;
   const totalCount = habits.length;
-
+  
   return (
     <div className="space-y-6">
       {/* Header with Gradient Glow */}
