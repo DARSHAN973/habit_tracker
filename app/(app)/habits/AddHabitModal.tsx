@@ -32,7 +32,8 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 bg-black/30 flex items-end z-50"
-      onClick={onClose} >
+      onClick={onClose}
+    >
       <div
         className="bg-white w-full rounded-t-3xl p-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
@@ -46,25 +47,48 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        <select
-          className="w-full border rounded-xl p-3"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="HEALTH">Health</option>
-          <option value="FOCUS">Focus</option>
-          <option value="SKILL">Skill</option>
-          <option value="PERSONAL">Personal</option>
-        </select>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-slate-500 uppercase">
+            Category
+          </p>
 
-        <select
-          className="w-full border rounded-xl p-3"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="DAILY">Daily</option>
-          <option value="WEEKLY">Weekly</option>
-        </select>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { key: "HEALTH", label: "Health" },
+              { key: "FOCUS", label: "Focus" },
+              { key: "SKILL", label: "Skill" },
+              { key: "PERSONAL", label: "Personal" },
+            ].map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={`rounded-xl p-3 text-sm font-semibold border transition-all ${
+                  category === c.key
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white border-slate-200 text-slate-600"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {["DAILY", "WEEKLY"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`rounded-xl p-3 text-sm font-semibold border ${
+                type === t
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "border-slate-200"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
 
         <div className="flex gap-3 pt-2">
           <button
@@ -85,6 +109,5 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
-
   );
 }

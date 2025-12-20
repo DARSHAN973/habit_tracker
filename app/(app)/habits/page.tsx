@@ -1,9 +1,9 @@
-import { Plus, PauseCircle, PlayCircle, Settings2 } from "lucide-react";
+import { PauseCircle, PlayCircle, Settings2 } from "lucide-react";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/current-user";
+import { revalidatePath } from "next/cache";
 import HabitsClient from "./HabitsClient";
-import { useHabitModal } from "./HabitsClient";
-
+import AddHabitButton from "./AddHabitButton";
 
 export default async function HabitsPage() {
   const user = await getCurrentUser();
@@ -15,29 +15,30 @@ export default async function HabitsPage() {
     orderBy: { createdAt: "asc" },
   });
 
-  // 2️⃣ Real active count
+  // 2️⃣ Active count
   const activeCount = habits.filter((h) => h.isActive).length;
+
   return (
     <HabitsClient>
       <div className="space-y-6 relative min-h-screen pb-12">
         {/* Header */}
         <div className="relative mb-8">
-          <div className="absolute -inset-2 bg-linear-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20" />
+          <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20" />
 
           <div className="relative">
-            <p className="text-2xl font-black leading-tight mb-2 bg-linear-to-br from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+            <p className="text-2xl font-black leading-tight mb-2 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
               Your System
             </p>
             <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
+              <span className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full" />
               Manage your daily rituals
             </p>
           </div>
         </div>
 
-        {/* Overview Stat Card */}
+        {/* Overview Card */}
         <div className="relative rounded-3xl bg-white shadow-md p-6 overflow-hidden mb-8 border border-slate-50">
-          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
@@ -53,16 +54,8 @@ export default async function HabitsPage() {
               </div>
             </div>
 
-            {/* Add Habit Button (hook API later) */}
-            
-
-<button
- 
-  className="w-11 h-11 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center active:scale-90 transition-all hover:bg-blue-700"
->
-  <Plus className="w-6 h-6 stroke-[3px]" />
-</button>
-
+            {/* Add Habit Button */}
+            <AddHabitButton />
           </div>
         </div>
 
@@ -105,6 +98,7 @@ export default async function HabitsPage() {
                     where: { id: habit.id },
                     data: { isActive: !habit.isActive },
                   });
+                  revalidatePath("/habits");
                 }}
               >
                 <button
