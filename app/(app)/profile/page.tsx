@@ -1,89 +1,284 @@
-import { LogOut, Shield, Info, User, ChevronRight } from "lucide-react";
-import DateDisplay from "../components/DateDisplay";
+import { LogOut, TrendingUp, AlertCircle } from "lucide-react";
+import { prisma } from "@/app/lib/prisma";
+import { getCurrentUser } from "@/app/lib/getCurrentUser";
+import Link from "next/link";
+import { startOfWeek, endOfWeek, subWeeks } from "date-fns";
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const habits = await prisma.habit.findMany({
+    where: { userId: user.id },
+  });
+
+  const entries = await prisma.habitEntry.findMany({
+    where: { userId: user.id },
+  });
+
+  const activeHabits = habits.filter(h => h.isActive);
+
+  /* ---------- DAY-LEVEL ANALYSIS ---------- */
+  const daysSet = new Set(entries.map(e => e.date.toISOString().split("T")[0]));
+  const daysTracked = daysSet.size;
+
+  const totalPossible = daysTracked * (activeHabits.length || 1);
+  const completionPercent =
+    totalPossible === 0 ? 0 : Math.round((entries.length / totalPossible) * 100);
+
+  /* ---------- THIS WEEK SUMMARY ---------- */
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+  const weekEntries = entries.filter(
+    e => e.date >= weekStart && e.date <= weekEnd
+  );
+
+  const dailyCount = activeHabits.filter(h => h.type === "DAILY").length;
+  const weeklyCount = activeHabits.filter(h => h.type === "WEEKLY").length;
+  const weekPossible = dailyCount * 7 + weeklyCount;
+
+  const weekCompletionPercent =
+    weekPossible === 0
+      ? 0
+      : Math.round((weekEntries.length / weekPossible) * 100);
+
+  /* ---------- DATA SUFFICIENCY CHECK ---------- */
+  const datesSorted = [...daysSet].sort();
+  const hasEnoughData =
+    datesSorted.length >= 7 &&
+    new Date(datesSorted[0]) <= subWeeks(now, 1);
+
+  /* ---------- STRONG / WEAK HABITS ---------- */
+  let strongestHabit = null;
+  let weakestHabit = null;
+  let strongestCount = 0;
+  let weakestCount = 0;
+
+  if (hasEnoughData && activeHabits.length > 0) {
+    const completionMap: Record<string, number> = {};
+    activeHabits.forEach(h => (completionMap[h.id] = 0));
+
+    entries.forEach(e => {
+      if (completionMap[e.habitId] !== undefined) {
+        completionMap[e.habitId]++;
+      }
+    });
+
+    const sorted = Object.entries(completionMap).sort((a, b) => b[1] - a[1]);
+
+    strongestHabit = habits.find(h => h.id === sorted[0]?.[0]) || null;
+    strongestCount = sorted[0]?.[1] ?? 0;
+
+    weakestHabit = habits.find(h => h.id === sorted.at(-1)?.[0]) || null;
+    weakestCount = sorted.at(-1)?.[1] ?? 0;
+  }
+
   return (
     <div className="space-y-6 min-h-screen pb-12">
-      {/* Header with Gradient Glow */}
+      {/* HEADER */}
       <div className="relative mb-8">
         <div className="absolute -inset-2 bg-linear-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20" />
-
         <div className="relative">
           <p className="text-2xl font-black leading-tight mb-2 bg-linear-to-br from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
             Your Space
           </p>
           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
             <span className="w-8 h-0.5 bg-linear-to-r from-indigo-500 to-transparent rounded-full" />
-            Manage your personal system
+            Discipline reflected honestly
           </p>
-          <div className="absolute top-0 right-0">
-            <DateDisplay />
-          </div>
         </div>
       </div>
 
-      {/* Primary User Card (Themed like the Habit Progress Card) */}
-      <div className="relative rounded-3xl bg-white shadow-md p-6 overflow-hidden mb-8 border border-slate-50">
+      {/* USER CARD */}
+      <div className="relative rounded-3xl bg-white shadow-md p-6 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-slate-900/20">
-              D
-            </div>
-            <div>
-              <p className="font-bold text-xl text-slate-800">Darshan</p>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Building discipline daily</p>
-            </div>
+        <div className="relative flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-black">
+            {(user.name ? user.name.charAt(0).toUpperCase() : "")}
           </div>
-
-          <button className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50">
-            <User className="w-5 h-5 text-slate-600" />
-          </button>
+          <div>
+            <p className="font-black text-2xl text-slate-800">{user.name}</p>
+            <p className="text-xs text-slate-500 font-medium">
+              Building discipline daily
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Philosophy Card with Subtle Tint */}
-      <div className="relative rounded-3xl bg-white shadow-sm p-6 overflow-hidden border border-slate-50">
-        <div className="absolute inset-0 bg-linear-to-tr from-indigo-500/5 to-transparent" />
-        <div className="relative">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 mb-3">
-            Philosophy
-          </p>
-          <p className="text-lg font-bold leading-tight text-slate-800">
-            Discipline decides your future.
-          </p>
-          <p className="text-sm font-medium text-slate-500 mt-2 leading-relaxed">
-            This system exists to help you show up, even when motivation fades.
-          </p>
+      {/* DISCIPLINE OVERVIEW */}
+      <div className="rounded-3xl bg-white shadow-md p-6 space-y-5">
+        <p className="text-xs font-black uppercase tracking-widest text-blue-600">
+          Discipline Overview
+        </p>
+
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <CircleStat label="Days Tracked" value={daysTracked} percentage={0} />
+          <CircleStat
+            label="Completion"
+            value={`${completionPercent}%`}
+            percentage={completionPercent}
+          />
+          <CircleStat
+            label="Active Habits"
+            value={activeHabits.length}
+            percentage={0}
+          />
         </div>
       </div>
 
-      {/* Action List */}
-      <div className="space-y-3">
-        {[
-          { icon: <Shield className="w-5 h-5" />, label: "Privacy & Security" },
-          { icon: <Info className="w-5 h-5" />, label: "About the App" },
-        ].map((item, idx) => (
-          <div
-            key={idx}
-            className="rounded-2xl bg-white shadow-sm p-5 flex items-center justify-between transition-all hover:shadow-md border border-slate-50 active:scale-[0.99]"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                {item.icon}
-              </div>
-              <p className="font-bold text-slate-700">{item.label}</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-300" />
+      {/* THIS WEEK */}
+      <div className="rounded-3xl bg-white shadow-md p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="text-blue-600 w-5 h-5" />
+          <p className="text-xs font-black uppercase tracking-widest text-blue-600">
+            This Week
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-4xl font-black">{weekEntries.length}</p>
+            <p className="text-xs text-slate-500">
+              {weekCompletionPercent}% completion rate
+            </p>
           </div>
-        ))}
+
+          <CircleProgress percent={weekCompletionPercent} />
+        </div>
       </div>
 
-      {/* Logout Button */}
-      <button className="w-full mt-4 rounded-2xl bg-red-50 text-red-600 font-bold py-5 flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-red-100 border border-red-100/50">
-        <LogOut className="w-5 h-5 stroke-[2.5px]" />
-        <span className="uppercase tracking-wider text-xs">Terminate Session</span>
-      </button>
+      {/* INSIGHTS */}
+      {hasEnoughData && strongestHabit && (
+        <InsightCard
+          title="You are strongest at"
+          value={strongestHabit.title}
+          sub={`Completed ${strongestCount} times`}
+          color="green"
+        />
+      )}
+
+      {hasEnoughData && weakestHabit && (
+        <InsightCard
+          title="Needs attention"
+          value={weakestHabit.title}
+          sub={`Completed ${weakestCount} times`}
+          color="red"
+        />
+      )}
+
+      {!hasEnoughData && (
+        <div className="rounded-2xl bg-white shadow-sm p-5 flex gap-4">
+          <AlertCircle className="text-blue-600" />
+          <div>
+            <p className="font-bold">Keep tracking</p>
+            <p className="text-xs opacity-60">
+              Insights unlock after 7 days
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ABOUT */}
+      <Link
+        href="/profile/about"
+        className="rounded-2xl bg-white shadow-sm p-5 flex justify-between"
+      >
+        <p className="font-bold">About the App</p>
+        <span>→</span>
+      </Link>
+
+      {/* LOGOUT */}
+      <form action="/api/auth/logout" method="POST">
+        <button className="w-full rounded-2xl bg-red-50 text-red-600 font-bold py-5">
+          <LogOut className="inline w-5 h-5 mr-2" />
+          Terminate Session
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ---------- COMPONENTS ---------- */
+
+function CircleStat({ label, value, percentage }: { label: string; value: string | number; percentage: number }) {
+  const safe = Math.max(Number(percentage) || 0, 3);
+  const C = 2 * Math.PI * 32;
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-20 h-20">
+        {percentage > 0 ? (
+          <>
+            <svg className="w-20 h-20 transform -rotate-90">
+              <circle cx="40" cy="40" r="32" strokeWidth="6" className="text-blue-500/20" stroke="currentColor" fill="none" />
+              <circle
+                cx="40"
+                cy="40"
+                r="32"
+                strokeWidth="6"
+                stroke="currentColor"
+                fill="none"
+                strokeDasharray={C}
+                strokeDashoffset={C * (1 - safe / 100)}
+                className="text-blue-600"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="font-bold text-blue-600">{value}</span>
+            </div>
+          </>
+        ) : (
+          <div className="w-20 h-20 rounded-full border-[6px] border-blue-500/20 flex items-center justify-center">
+            <span className="font-bold text-blue-600">{value}</span>
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-slate-500 mt-2">{label}</p>
+    </div>
+  );
+}
+
+function CircleProgress({ percent }: { percent: number }) {
+  const safe = Math.max(Number(percent) || 0, 3);
+  const C = 2 * Math.PI * 32;
+
+  return (
+    <div className="relative w-20 h-20">
+      <svg className="w-20 h-20 transform -rotate-90">
+        <circle cx="40" cy="40" r="32" strokeWidth="6" className="text-blue-500/20" stroke="currentColor" fill="none" />
+        <circle
+          cx="40"
+          cy="40"
+          r="32"
+          strokeWidth="6"
+          stroke="currentColor"
+          fill="none"
+          strokeDasharray={C}
+          strokeDashoffset={C * (1 - safe / 100)}
+          className="text-blue-600"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-bold text-blue-600">{percent}%</span>
+      </div>
+    </div>
+  );
+}
+
+function InsightCard({ title, value, sub, color }: { title: string; value: string; sub: string; color: "green" | "red" }) {
+  const Icon = color === "green" ? TrendingUp : AlertCircle;
+  return (
+    <div className="rounded-2xl bg-white shadow-sm p-5 flex gap-4">
+      <Icon className={`w-5 h-5 ${color === "green" ? "text-green-600" : "text-red-600"}`} />
+      <div>
+        <p className="text-xs opacity-60">{title}</p>
+        <p className="font-bold">{value}</p>
+        <p className="text-xs opacity-60">{sub}</p>
+      </div>
     </div>
   );
 }

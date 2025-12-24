@@ -7,6 +7,7 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("HEALTH");
   const [type, setType] = useState("DAILY");
+  const [days, setDays] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -25,6 +26,7 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
           title: title.trim(),
           category,
           type,
+          days: type === "WEEKLY" ? days : undefined,
         }),
       });
 
@@ -100,6 +102,79 @@ export default function AddHabitModal({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
+
+        {type === "WEEKLY" && (
+          <div className="pt-3">
+            <p className="text-xs font-semibold text-slate-500 uppercase mb-2">
+              Select days
+            </p>
+
+            {/* Mobile: horizontal scrollable row; Desktop (sm+): 7-column grid */}
+            <div className="sm:hidden">
+              <div className="-mx-3 px-3 overflow-x-auto flex gap-2 pb-1">
+                {[
+                  { key: 0, label: 'Sun' },
+                  { key: 1, label: 'Mon' },
+                  { key: 2, label: 'Tue' },
+                  { key: 3, label: 'Wed' },
+                  { key: 4, label: 'Thu' },
+                  { key: 5, label: 'Fri' },
+                  { key: 6, label: 'Sat' },
+                ].map((d) => {
+                  const active = days.includes(d.key);
+                  return (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => {
+                        setDays((prev) =>
+                          prev.includes(d.key) ? prev.filter((x) => x !== d.key) : [...prev, d.key]
+                        );
+                      }}
+                      aria-pressed={active}
+                      className={`min-w-14 shrink-0 rounded-xl px-3 py-2 text-sm font-semibold border text-center ${
+                        active
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="hidden sm:grid grid-cols-7 gap-2">
+              {[
+                { key: 0, label: 'Sun' },
+                { key: 1, label: 'Mon' },
+                { key: 2, label: 'Tue' },
+                { key: 3, label: 'Wed' },
+                { key: 4, label: 'Thu' },
+                { key: 5, label: 'Fri' },
+                { key: 6, label: 'Sat' },
+              ].map((d) => {
+                const active = days.includes(d.key);
+                return (
+                  <button
+                    key={d.key}
+                    type="button"
+                    onClick={() => {
+                      setDays((prev) => (prev.includes(d.key) ? prev.filter((x) => x !== d.key) : [...prev, d.key]));
+                    }}
+                    aria-pressed={active}
+                    className={`rounded-xl px-2 py-2 text-sm font-semibold border text-center ${
+                      active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
   <div className="flex gap-3 pt-2">
           <button

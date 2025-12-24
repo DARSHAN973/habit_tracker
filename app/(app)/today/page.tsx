@@ -26,7 +26,30 @@ export default async function TodayPage() {
     orderBy: { createdAt: "asc" },
   });
 
-  const data = habits.map((h) => ({
+  // Filter habits: show DAILY habits and WEEKLY habits only when today matches one of the scheduled days
+  const todayWeekday = new Date().getDay(); // 0 = Sunday .. 6 = Saturday
+  const filtered = habits.filter((h) => {
+    if (h.type === "DAILY") return true;
+    if (h.type === "WEEKLY") {
+      try {
+  const days = (h as unknown as { days?: unknown }).days;
+        if (!days) return false;
+        if (Array.isArray(days)) return days.includes(todayWeekday);
+        // if stored as JSON string
+        if (typeof days === "string") {
+          const parsed = JSON.parse(days);
+          return Array.isArray(parsed) && parsed.includes(todayWeekday);
+        }
+        return false;
+      } catch (err) {
+        console.error("Error parsing habit.days for habit", h.id, err);
+        return false;
+      }
+    }
+    return false;
+  });
+
+  const data = filtered.map((h) => ({
     id: h.id,
     title: h.title,
     category: h.category,
