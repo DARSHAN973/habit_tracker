@@ -9,17 +9,21 @@ export async function getCurrentUser () {
         return null ;
     }
 
-    const session = await prisma.session.findUnique({
-        where: {token: sessionToken},
-        include: {user: true},
-    });
+    try {
+        const session = await prisma.session.findUnique({
+            where: { token: sessionToken },
+            include: { user: true },
+        });
 
-    if(!session){
+        if(!session) return null;
+
+        if (session.expiresAt < new Date()) return null;
+
+        return session.user;
+    } catch (err) {
+        console.error("getCurrentUser prisma error:", err);
+        // If the database is unreachable, return null so pages treat the user as unauthenticated
+        // instead of crashing the server rendering.
         return null;
     }
-
-    if (session.expiresAt < new Date()){
-        return null;
-    }
-    return session.user;
 }

@@ -12,36 +12,39 @@ model User {
   name      String
   email     String       @unique
   password  String
+  createdAt DateTime     @default(now())
   habits    Habit[]
   entries   HabitEntry[]
-  sessions Session[]
-  createdAt DateTime     @default(now())
+  sessions  Session[]
 }
 
 model Habit {
-  id        String       @id @default(uuid())
+  id        String        @id @default(uuid())
   userId    String
   title     String
   type      HabitType
   category  HabitCategory
   startDate DateTime
-  active  Boolean      @default(true)
-  user      User         @relation(fields: [userId], references: [id])
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id])
   entries   HabitEntry[]
-  createdAt DateTime     @default(now())
+
+  @@index([userId], map: "Habit_userId_fkey")
 }
 
 model HabitEntry {
-  id        String       @id @default(uuid())
+  id        String      @id @default(uuid())
   userId    String
   habitId   String
   date      DateTime
   status    HabitStatus
-  user      User         @relation(fields: [userId], references: [id])
-  habit     Habit        @relation(fields: [habitId], references: [id])
-  createdAt DateTime     @default(now())
+  createdAt DateTime    @default(now())
+  habit     Habit       @relation(fields: [habitId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
 
   @@unique([habitId, date])
+  @@index([userId], map: "HabitEntry_userId_fkey")
 }
 
 model Session {
@@ -49,8 +52,10 @@ model Session {
   userId    String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())        
+
+  @@index([userId], map: "Session_userId_fkey")
 }
 
 enum HabitType {
