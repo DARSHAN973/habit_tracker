@@ -14,7 +14,7 @@ export default function AuthPage() {
 
   // redirect if already logged in
   useEffect(() => {
-    fetch("/api/test/me").then((res) => {
+    fetch("/api/test/me", { credentials: "include" }).then((res) => {
       if (res.ok) {
         window.location.href = "/";
       }
@@ -35,6 +35,7 @@ export default function AuthPage() {
     try {
       const res = await fetch(url, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

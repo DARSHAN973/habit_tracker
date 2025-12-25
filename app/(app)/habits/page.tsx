@@ -6,6 +6,8 @@ import HabitsClient from "./HabitsClient";
 import AddHabitButton from "./AddHabitButton";
 import ToggleHabitButton from "./ToggleHabitButton";
 import DeleteHabitButton from "./DeleteHabitButton";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export default async function HabitsPage() {
   const user = await getCurrentUser();

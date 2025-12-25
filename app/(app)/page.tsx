@@ -2,6 +2,9 @@ import { TrendingUp, AlertCircle, Award } from "lucide-react";
 import { getCurrentUser } from "@/app/lib/getCurrentUser";
 import { computeDashboardForUser } from "@/app/lib/dashboard";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 async function getDashboardData() {
   const defaults = {
     level: 0,
