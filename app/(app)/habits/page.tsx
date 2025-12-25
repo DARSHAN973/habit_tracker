@@ -1,7 +1,7 @@
 import { Settings2 } from "lucide-react";
 import DateDisplay from "../components/DateDisplay";
 import { prisma } from "@/app/lib/prisma";
-import { getCurrentUser } from "@/app/lib/current-user";
+import { getCurrentUser } from "@/app/lib/getCurrentUser";
 import HabitsClient from "./HabitsClient";
 import AddHabitButton from "./AddHabitButton";
 import ToggleHabitButton from "./ToggleHabitButton";
@@ -11,7 +11,14 @@ export const dynamic = "force-dynamic";
 
 export default async function HabitsPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-lg font-semibold text-slate-600">You must be logged in to view your habits.</p>
+        <a href="/auth" className="text-blue-600 underline mt-2">Go to Login</a>
+      </div>
+    );
+  }
 
   // 1️⃣ Fetch real habits
   const habits = await prisma.habit.findMany({

@@ -1,5 +1,5 @@
 import { prisma } from "@/app/lib/prisma";
-import { getCurrentUser } from "@/app/lib/current-user";
+import { getCurrentUser } from "@/app/lib/getCurrentUser";
 import TodayClient from "./TodayClient";
 import DateDisplay from "../components/DateDisplay";
 
@@ -8,7 +8,14 @@ export const dynamic = "force-dynamic";
 
 export default async function TodayPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-lg font-semibold text-slate-600">You must be logged in to view your habits for today.</p>
+        <a href="/auth" className="text-blue-600 underline mt-2">Go to Login</a>
+      </div>
+    );
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
