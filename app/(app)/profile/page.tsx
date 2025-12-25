@@ -3,6 +3,8 @@ import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/getCurrentUser";
 import Link from "next/link";
 import { startOfWeek, endOfWeek, subWeeks } from "date-fns";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();

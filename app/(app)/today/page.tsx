@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/app/lib/current-user";
 import TodayClient from "./TodayClient";
 import DateDisplay from "../components/DateDisplay";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export default async function TodayPage() {
   const user = await getCurrentUser();
   if (!user) return null;

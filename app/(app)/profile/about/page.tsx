@@ -1,5 +1,7 @@
 import { Target, TrendingUp, Brain, Shield, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export default function AboutAppPage() {
   return (
