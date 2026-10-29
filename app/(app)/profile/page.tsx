@@ -8,14 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <p className="text-lg font-semibold text-slate-600">You must be logged in to view your profile.</p>
-        <a href="/auth" className="text-blue-600 underline mt-2">Go to Login</a>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   const habits = await prisma.habit.findMany({
     where: { userId: user.id },
